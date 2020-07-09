@@ -202,10 +202,10 @@ public class mafScanCcr {
 									{
 										AlnTab = new char [ MafTab.length ][] ;
 										//lose the sequence information
-										String [][] SmallMafTab = new String [ MafTab.length ][ 5 ] ;
+										String [][] SmallMafTab = new String [ MafTab.length ][ 6 ] ;
 										for (int r = 0 ; r != MafTab.length ; r++ ){
 											AlnTab[r] = MafTab[ r ][ 6 ].toCharArray() ; 
-											for (int c = 0 ; c != 5 ; c++ )
+											for (int c = 0 ; c != 6 ; c++ )
 												SmallMafTab[ r ][ c ] = MafTab[ r ][ c ];  
 										}
 										SplitNfold( SmallMafTab, AlnTab );
@@ -255,9 +255,9 @@ public class mafScanCcr {
 												if ( AlnTab[0][0] == '@' ) 
 													continue ; 
 												//lose the sequence information
-												String [][] SmallMafTab = new String [ MafTab.length ][ 5 ] ;
+												String [][] SmallMafTab = new String [ MafTab.length ][ 6 ] ;
 												for (int r = 0 ; r != MafTab.length ; r++ )
-													for (int c = 0 ; c != 5 ; c++ )
+													for (int c = 0 ; c != 6 ; c++ )
 														SmallMafTab[ r ][ c ] = MafTab[ r ][ c ];  
 												SplitNfold( SmallMafTab, AlnTab );
 											}
@@ -276,9 +276,9 @@ public class mafScanCcr {
 											if (VERBOSE) 
 												System.out.println( "-------> Scanning alignment");
 											//lose the sequence information
-											String [][] SmallMafTab = new String [ MafTab.length ][ 5 ] ;
+											String [][] SmallMafTab = new String [ MafTab.length ][ 6 ] ;
 											for (int r = 0 ; r != MafTab.length ; r++ )
-												for (int c = 0 ; c != 5 ; c++ )
+												for (int c = 0 ; c != 6 ; c++ )
 													SmallMafTab[ r ][ c ] = MafTab[ r ][ c ];  
 											SplitNfold( SmallMafTab, AlnTab );
 										}
