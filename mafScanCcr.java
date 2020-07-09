@@ -175,7 +175,7 @@ public class mafScanCcr {
 				readBlocks: while ( (Line = ReadFile.readLine()) != null || newLineCount == lineCount ) {
 					if (  Line == null || Line.length() > 1 && Line.charAt(0) != '#' )
 						newLineCount++ ; 
-					if ( newLineCount > lineCount || Line.length() > 1 ) { // only lines with sequences
+					if ( newLineCount > lineCount || Line.length() >= 1 ) { // only lines with sequences
 						try {
 							if ( newLineCount <= lineCount && Line.length() > 1 && Line.substring(0,1).equals("s") ) {
 								Temp = Temp + Line + "@" ; 
