@@ -291,7 +291,7 @@ public class ScanItFast implements Runnable {
 			humanLength = (startPos + coordTab[step + WINDOW -1] -1) - (startPos + coordTab[ step ])+1 ;
 		}
 		else { // this should only occur in user specified cases
-			BedFile = BedFile + (Integer.parseInt(MafTab[0][5]) - (startPos + coordTab[ step  + WINDOW ] )  )
+			BedFile = BedFile + (Integer.parseInt(MafTab[0][5]) - (startPos + coordTab[ step  + WINDOW -1 ] )  )
 			+"\t"+ (Integer.parseInt(MafTab[0][5]) - (startPos + coordTab[ step ] ) +1 )+"\t";
 			
 			humanLength =  (Integer.parseInt(MafTab[0][5]) - (startPos + coordTab[ step ] ) +1 ) 
