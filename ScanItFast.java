@@ -131,15 +131,17 @@ public class ScanItFast implements Runnable {
 		OutAlnRC = new String[ goodSeqs ]  ;  
         iterate = 0 ;
 		for (int seq = 0 ; seq != FilteredTab.length  ; seq++ ) { //removed x < goodseqs
-			if ( keepMe[ seq ] ) { 
-				OutAln[ iterate ] = NameTab[ seq ].substring( 0, Math.min( NameTab[ seq ].length(), 20)) ;
-				for (int i = 0 ; i != 25- Math.min(  NameTab[ seq ].length() , 20) ; i++ )
-					OutAln[ iterate ] = OutAln[ iterate ] + " ";
-				for (int i = 0 ; i != FilteredTab[ 0 ].length() ; i++ )
-					if ( hasChars[ i ])
-						OutAln[ iterate ] = OutAln[ iterate ] + FilteredTab[ seq ].charAt( i ) ;
-				OutAln[ iterate ] = OutAln[ iterate ] + "\n" ;
-				iterate++ ;
+			if ( keepMe[ seq ] ) {
+				if (NameTab[seq] != null && seq < NameTab.length){
+					OutAln[iterate] = NameTab[seq].substring(0, Math.min(NameTab[seq].length(), 20));
+				for (int i = 0; i != 25 - Math.min(NameTab[seq].length(), 20); i++)
+					OutAln[iterate] = OutAln[iterate] + " ";
+				for (int i = 0; i != FilteredTab[0].length(); i++)
+					if (hasChars[i])
+						OutAln[iterate] = OutAln[iterate] + FilteredTab[seq].charAt(i);
+				OutAln[iterate] = OutAln[iterate] + "\n";
+				iterate++;
+				}
 			}
 		}
 		
@@ -167,6 +169,8 @@ public class ScanItFast implements Runnable {
                         
                         if ( isNotUnique[ j ] )
                             continue;
+                        else if( OutAln[i] == null || OutAln[j] == null)
+                        	continue;
                         else if ( OutAln[ i ].charAt( k ) == OutAln[ j ].charAt( k ) ) {
 							// this DP matrix makes shit easy!
                             if ( OutAln[ i ].charAt( k ) == 'A' || OutAln[ i ].charAt( k ) == 'T'
@@ -219,50 +223,53 @@ public class ScanItFast implements Runnable {
 		for ( int k = 25 ; k != OutAln[0].length() ; k ++ ) { 
 			chars = new double [5] ; 
 			for ( int i = 0 ; i != goodSeqs ; i++ ) {
-				if ( isNotUnique[ i ] ) { 
-					if ( k == OutAln[0].length()-2 ) 
-						uniqueSeqs-- ; 
-					continue ; 
+				if (isNotUnique[i]) {
+					if (k == OutAln[0].length() - 2)
+						uniqueSeqs--;
+					continue;
 				}
-				switch ( OutAln[i].charAt( k ) ) { 
-					case 'A':
-						chars[0]++ ;
-						totalChars[0]++ ;
-						OutAlnRC[ i ] = (k == 25 )? "T" : "T" + OutAlnRC[ i ] ; 
-						break;
-					case 'U':
-						chars[1]++ ;
-						totalChars[1]++ ;
-						OutAlnRC[ i ] = (k == 25 )? "A" : "A" + OutAlnRC[ i ] ; 
-						break;
-					case 'T':
-						chars[1]++ ;
-						totalChars[1]++ ;
-						OutAlnRC[ i ] = (k == 25 )? "A" : "A" + OutAlnRC[ i ] ; 
-						break;
-					case 'C':
-						chars[2]++ ;
-						totalChars[2]++ ;
-						OutAlnRC[ i ] = (k == 25 )? "G" : "G" + OutAlnRC[ i ] ; 
-						break;
-					case 'G':
-						chars[3]++ ;
-						totalChars[3]++ ;
-						OutAlnRC[ i ] = (k == 25 )? "C" : "C" + OutAlnRC[ i ] ; 
-						break;
-					case '\n':
-						OutAlnRC[ i ] = OutAlnRC[ i ] + '\n' ;
-						break;
-					case 'N':
-						chars[4]++ ;
-						totalChars[4]++ ;
-						OutAlnRC[ i ] = (k == 25 )? "N" : "N" + OutAlnRC[ i ] ; 
-						break;
-					default:
-						chars[4]++ ; 
-						totalChars[4]++ ;
-						OutAlnRC[ i ] = (k == 25 )? "-" : "-" + OutAlnRC[ i ] ;
-						break;
+				if (OutAln[i] != null) {
+
+					switch (OutAln[i].charAt(k)) {
+						case 'A':
+							chars[0]++;
+							totalChars[0]++;
+							OutAlnRC[i] = (k == 25) ? "T" : "T" + OutAlnRC[i];
+							break;
+						case 'U':
+							chars[1]++;
+							totalChars[1]++;
+							OutAlnRC[i] = (k == 25) ? "A" : "A" + OutAlnRC[i];
+							break;
+						case 'T':
+							chars[1]++;
+							totalChars[1]++;
+							OutAlnRC[i] = (k == 25) ? "A" : "A" + OutAlnRC[i];
+							break;
+						case 'C':
+							chars[2]++;
+							totalChars[2]++;
+							OutAlnRC[i] = (k == 25) ? "G" : "G" + OutAlnRC[i];
+							break;
+						case 'G':
+							chars[3]++;
+							totalChars[3]++;
+							OutAlnRC[i] = (k == 25) ? "C" : "C" + OutAlnRC[i];
+							break;
+						case '\n':
+							OutAlnRC[i] = OutAlnRC[i] + '\n';
+							break;
+						case 'N':
+							chars[4]++;
+							totalChars[4]++;
+							OutAlnRC[i] = (k == 25) ? "N" : "N" + OutAlnRC[i];
+							break;
+						default:
+							chars[4]++;
+							totalChars[4]++;
+							OutAlnRC[i] = (k == 25) ? "-" : "-" + OutAlnRC[i];
+							break;
+					}
 				}
 			}
 			for (int z = 0 ; z != 5 ; z++ ) 
@@ -321,7 +328,7 @@ public class ScanItFast implements Runnable {
 				WriteClustal.write("CLUSTAL format sucks\n\n") ; 
 				WriteClustalRC.write("CLUSTAL format sucks\n\n") ; 
 				for ( int y = 0 ; y != goodSeqs ; y++ ) {
-					if ( !isNotUnique[ y ] ) {
+					if ( !isNotUnique[ y ] && OutAln[ y] != null) {
 						WriteClustal.write( OutAln[ y ] ) ; 
 						OutAlnRC[ y ] = OutAln[ y ].substring(0,25)+ OutAlnRC[ y ]  ;
 						WriteClustalRC.write( OutAlnRC[ y ] ) ; 
