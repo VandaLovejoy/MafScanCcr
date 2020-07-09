@@ -302,7 +302,7 @@ public class ScanItFast implements Runnable {
 			+"\t"+ (Integer.parseInt(MafTab[0][5]) - (startPos + coordTab[ step ] ) +1 )+"\t";
 			
 			humanLength =  (Integer.parseInt(MafTab[0][5]) - (startPos + coordTab[ step ] ) +1 ) 
-			- (Integer.parseInt(MafTab[0][5]) - (startPos + coordTab[ step  + WINDOW ] )  )+1 ; 
+			- (Integer.parseInt(MafTab[0][5]) - (startPos + coordTab[ step  + WINDOW -1 ] )  )+1 ;
 		}		
 		BedFile = BedFile	+ (int)uniqueSeqs+":"+((double)(int)(10*stats[0])/10)+":"      // MPI
 			+ ((double)(int)(10*stats[5])/10)+":"					  // CLASSIC MPI
