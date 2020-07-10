@@ -180,7 +180,7 @@ public class mafScanCcr {
 							if ( newLineCount <= lineCount && Line.length() > 1 && Line.substring(0,1).equals("s") ) {
 								Temp = Temp + Line + "@" ; 
 							}
-							else if ( (Line != null && Line.length() > 1 && Line.substring(0,1).equals("a") ) || newLineCount > lineCount ) {
+							else if ( (Line != null && Line.length() >= 1 && Line.substring(0,1).equals("a") ) || newLineCount > lineCount ) {
 								if ( newLineCount == 1 ) 
 									continue readBlocks ; 
 								
