@@ -132,7 +132,6 @@ public class ScanItFast implements Runnable {
         iterate = 0 ;
 		for (int seq = 0 ; seq != FilteredTab.length  ; seq++ ) { //removed x < goodseqs
 			if ( keepMe[ seq ] ) {
-				if (NameTab[seq] != null && seq < NameTab.length){
 					OutAln[iterate] = NameTab[seq].substring(0, Math.min(NameTab[seq].length(), 20));
 				for (int i = 0; i != 25 - Math.min(NameTab[seq].length(), 20); i++)
 					OutAln[iterate] = OutAln[iterate] + " ";
@@ -141,7 +140,7 @@ public class ScanItFast implements Runnable {
 						OutAln[iterate] = OutAln[iterate] + FilteredTab[seq].charAt(i);
 				OutAln[iterate] = OutAln[iterate] + "\n";
 				iterate++;
-				}
+
 			}
 		}
 		
@@ -169,8 +168,6 @@ public class ScanItFast implements Runnable {
                         
                         if ( isNotUnique[ j ] )
                             continue;
-                        else if( OutAln[i] == null || OutAln[j] == null)
-                        	continue;
                         else if ( OutAln[ i ].charAt( k ) == OutAln[ j ].charAt( k ) ) {
 							// this DP matrix makes shit easy!
                             if ( OutAln[ i ].charAt( k ) == 'A' || OutAln[ i ].charAt( k ) == 'T'
@@ -228,7 +225,6 @@ public class ScanItFast implements Runnable {
 						uniqueSeqs--;
 					continue;
 				}
-				if (OutAln[i] != null) {
 
 					switch (OutAln[i].charAt(k)) {
 						case 'A':
@@ -270,7 +266,6 @@ public class ScanItFast implements Runnable {
 							OutAlnRC[i] = (k == 25) ? "-" : "-" + OutAlnRC[i];
 							break;
 					}
-				}
 			}
 			for (int z = 0 ; z != 5 ; z++ ) 
 				shanon = ( chars[z] == 0 )? shanon + 0 : shanon +  chars[z]/uniqueSeqs * ( Math.log( chars[z]/uniqueSeqs ) / Math.log( 2 )); 
@@ -328,7 +323,7 @@ public class ScanItFast implements Runnable {
 				WriteClustal.write("CLUSTAL format sucks\n\n") ; 
 				WriteClustalRC.write("CLUSTAL format sucks\n\n") ; 
 				for ( int y = 0 ; y != goodSeqs ; y++ ) {
-					if ( !isNotUnique[ y ] && OutAln[ y] != null) {
+					if ( !isNotUnique[ y ] ) {
 						WriteClustal.write( OutAln[ y ] ) ; 
 						OutAlnRC[ y ] = OutAln[ y ].substring(0,25)+ OutAlnRC[ y ]  ;
 						WriteClustalRC.write( OutAlnRC[ y ] ) ; 
