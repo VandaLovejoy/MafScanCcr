@@ -13,7 +13,7 @@ public class mafScanCcr {
 				BLOCK_SIZE = 5000,
 				MAFFT_LIMIT = 10000-(WINDOW+STEP), // this will not change when arguments are specified. Variable should be reinitiated for inputs
 				GAPS = 50,
-				NTHREDS = 4 ;
+				NTHREDS = 25 ;
 	static boolean 
 				FILTER_ID = true, //for removing identical sequences
 				VERBOSE = false,
@@ -218,12 +218,14 @@ public class mafScanCcr {
 										if ( MafTab[0][6].length() > MAFFT_LIMIT + WINDOW ) {
 											if (VERBOSE)
 												System.out.println("--> Splitting large input alignment "+ MafTab[0][6].length()) ; 
-											int from = 0, to = BLOCK_SIZE ; 
-											String [][] MafPartTab = new String [ MafTab.length ][ 7 ] ;
+											int from = 0, to = BLOCK_SIZE ;
+											//mafpartab changed to 6
+											String [][] MafPartTab = new String [ MafTab.length ][ 6 ] ;
 											// copy split maf tab
 											while ( from < MafTab[0][6].length() ) {
 												for (int y = 0 ; y != MafTab.length ; y++ ) {
-													for ( int z = 0 ; z != 7 ; z++ ) { 
+
+													for ( int z = 0 ; z != 7 ; z++ ) {
 														// deal with strands
 														if ( z == 2 && y == 0 ) {
 															MafPartTab[ 0 ][2] = (MafTab[ 0 ][ 4 ].charAt(0) == '+' )?
@@ -232,13 +234,20 @@ public class mafScanCcr {
 														}
 														// split maf sequence
 														else if ( z == 6 ) {
-															MafPartTab[ y ][ 6 ] = MafTab[ y ][ 6 ].substring( from, to ) ;
+															//changed from 6 to 5
+															MafPartTab[ y ][ 5 ] = MafTab[ y ][ 6 ].substring( from, to ) ;
 															// change alignment length annotation
-															MafPartTab[ y ][ 3 ] = ""+MafPartTab[ y ][ 6 ].replaceAll( "[\\.-]", "").length() ; 
+															//changed vanda from 6 to 5
+															MafPartTab[ y ][ 3 ] = ""+MafPartTab[ y ][ 5 ].replaceAll( "[\\.-]", "").length() ;
+														}
+														//changed
+														else if (z == 5) {
+															MafPartTab[ y ][ 4 ] = MafTab[ y ][ z ];
 														}
 														//ignore length
 														else if ( z !=4 ) 
-															MafPartTab[ y ][ z ] = MafTab[ y ][ z ] ; 
+															MafPartTab[ y ][ z ] = MafTab[ y ][ z ] ;
+
 														
 													}
 												}				
@@ -246,6 +255,7 @@ public class mafScanCcr {
 													System.out.println( "-----> Realigning LARGE ("+ MafTab[0][6].length() +"nt) ALN of "+MafTab.length+" sequences");
 													System.out.println("- - -> Block "+ from + " : " + to  ) ;
 												}
+												System.out.println(Arrays.toString(MafPartTab));
 												AlnTab = 	Realign( MafPartTab ) ;
 												// make sure it's not empty!
 												from = from + BLOCK_SIZE - ( WINDOW - STEP ) ; 
@@ -359,23 +369,30 @@ public class mafScanCcr {
         }
         return true; 
 	}
-		
+
+
+
 	//*********************************************************************
 	//						MAFFT Realign                                 *
 	//*********************************************************************
 	private static synchronized char[][] Realign( String[][] MafTab ) throws IOException {
         char [][] realignment = new char [ 1 ][ 1 ];
-        try{
+       // try{
 		// write to fasta format
         BufferedWriter Fasta = new BufferedWriter(new FileWriter( FILENAME+".fasta" ));
 		for ( int x = 0 ; x != MafTab.length ; x++ ) {
 			// make sure no empty lines are included
-//			if ( MafTab[x][6].replaceAll("[\\.-]", "").length() != 0 ) {
-				Fasta.write( ">"+ MafTab[x][1] + "\n" ) ; 
-				Fasta.write( MafTab[x][6].replaceAll("[\\.-]", "") +"\n") ;
+			//if ( MafTab[x][6].replaceAll("[\\.-]", "").length() != 0 ) {
+				Fasta.write( ">"+ MafTab[x][1] + "\n" ) ;
+				//changed to 5
+			if(MafTab[0].length == 6) {
+				Fasta.write(MafTab[x][5].replaceAll("[\\.-]", "") + "\n");
+			} else {
+				Fasta.write(MafTab[x][6].replaceAll("[\\.-]", "") + "\n");
+			}
 //				if ( VERBOSE)
 //                   System.out.println( MafTab[x][1].substring(0,3)+ "\t"+MafTab[x][6].substring(0, Math.min(MafTab[x][6].length(), 100 ) ) ) ;
-//			}
+			//}
 		}
 		Fasta.close() ; 
 		if ( MafTab.length < 3 ) {
@@ -393,52 +410,67 @@ public class mafScanCcr {
 			System.out.println("Please install MAFFT and link its binaries to your $PATH" );  
 			System.exit(0);
 		}
-		ReadBin.close(); 
-		Process Mafft = Runtime.getRuntime().exec(MafftBin+" --thread "+ ( NTHREDS )+" --quiet "+FILENAME+".fasta" ) ;
+		ReadBin.close();
+
+		ProcessBuilder builder = new ProcessBuilder(MafftBin, "--quiet", FILENAME +".fasta");
+		builder.redirectErrorStream(true);
+		Process Mafft = builder.start();
 
 		BufferedReader ReAligned = new BufferedReader(new InputStreamReader(Mafft.getInputStream()));
-		String Sequence = "", Line = "" ;
-            
-		String [] Gapless = new String [ MafTab.length ] ; 
-		int seq = 0 ; 
-  		ReAligned.readLine() ; 
-		while ((Line = ReAligned.readLine()) != null) {
-			if (Line.charAt(0) == '>'){
-				seq++ ; 
-				Gapless[ seq -1 ] = Sequence.toUpperCase() ; 
-				Sequence = ReAligned.readLine() ;
-			}
-			else
-				Sequence = Sequence + Line ; 
-		}
-		Gapless[ seq ] = Sequence.toUpperCase() ; 
-            Mafft.waitFor() ;
-        ReAligned.close() ;
-            
-		if (VERBOSE)
-			System.out.println("Realigned "+ MafTab.length +" sequences");
-        realignment = new char [ MafTab.length ][ Gapless[0].length() ];
-		for ( int i = 0 ; i != MafTab.length ; i++ ) {
-//null pointer !
-			realignment[i] = Gapless[i].toCharArray();
-		}
-/*        if (VERBOSE && lineCount != MafTab.length ){
-            System.out.println( "AlnTab = "+ lineCount+"; MafTab = "+ MafTab.length );
-            for (int i = 0 ; i != lineCount ; i++ ){
-                for (int j = 0 ; j != 100 ; j++ )
-                    System.out.print( realignment[i][j]) ; 
-                    System.out.println();
-            }
-        }
-*/
-		File Temp = new File( FILENAME+".fasta" ) ;
-		Temp.delete() ; 
 
-        }
-        catch (InterruptedException Fuck) {
+
+		String Sequence = "", Line = "" ;
+		int seq = 0 ; 
+// changed length gapless by adding 1
+ String[] Gapless = new String [ MafTab.length +1] ;
+
+
+		while ((Line = ReAligned.readLine()) != null) {
+
+			if (Line.charAt(0) == '>') {
+				seq++;
+				Gapless[seq - 1] = Sequence.toUpperCase();
+				Sequence = ReAligned.readLine();
+
+			} else
+				Sequence = Sequence + Line;
+
+		}
+			Gapless[seq] = Sequence.toUpperCase();
+
+			ReAligned.close();
+
+			if (VERBOSE)
+				System.out.println("Realigned " + MafTab.length + " sequences");
+//changed from 0 to 1
+	realignment = new char[MafTab.length][Gapless[1].length()];
+	for (int i = 0; i != MafTab.length; i++) {
+
+//null pointer !
+
+    realignment[i] = Gapless[i+1].toCharArray();
+
+		}
+
+
+
+ //        if (VERBOSE && lineCount != MafTab.length ){
+          //  System.out.println( "AlnTab = "+ lineCount+"; MafTab = "+ MafTab.length );
+           // for (int i = 0 ; i != lineCount ; i++ ){
+             //   for (int j = 0 ; j != 100 ; j++ )
+                  //  System.out.print( realignment[i][j]) ;
+                  //  System.out.println();
+           // }
+       // }
+
+		File Temp = new File( FILENAME+".fasta" ) ;
+		Temp.delete() ;
+
+       // }
+        /*catch (InterruptedException Fuck) {
             System.err.println("Problem realigning...." );
             Fuck.printStackTrace();
-        }
+        }*/
         return realignment ;
 
     }
@@ -452,7 +484,7 @@ public class mafScanCcr {
 		}
 	}
     
-}	
+}
 
 
 /*
